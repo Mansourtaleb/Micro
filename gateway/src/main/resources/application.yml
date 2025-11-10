@@ -10,31 +10,35 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8080/realms/timeforge
+          # Dé-commente si tu veux forcer l'audience côté gateway :
+          audiences: users
 
   cloud:
     gateway:
       discovery:
         locator:
-          enabled: false   # ⬅️ désactive les routes auto
+          enabled: false
       routes:
         - id: users-service
           uri: lb://users
           predicates:
             - Path=/users/**
-          filters:
-            - RemoveRequestHeader=Cookie
-            # ❌ PAS de RewritePath ici
       globalcors:
         corsConfigurations:
-          "[/**]":
-            allowedOrigins: "*"
+          '[/**]':
+            allowedOrigins: "http://localhost:3000"
             allowedMethods: "*"
             allowedHeaders: "*"
+            allowCredentials: true
+
 management:
   endpoints:
     web:
       exposure:
         include: "*"
+  endpoint:
+    gateway:
+      enabled: true
 
 logging:
   level:

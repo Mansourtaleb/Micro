@@ -6,7 +6,13 @@ spring:
     name: users
   config:
     import: "optional:configserver:http://localhost:8888"
-
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/timeforge
+          jwk-set-uri: http://localhost:8080/realms/timeforge/protocol/openid-connect/certs
+          audiences: users
 eureka:
   client:
     service-url:
