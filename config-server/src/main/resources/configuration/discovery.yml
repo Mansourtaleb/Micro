@@ -1,20 +1,16 @@
+      logging:
+        level:
+          com.netflix.discovery: DEBUG
+          org.springframework.cloud.netflix.eureka: DEBUG
 server:
   port: 8761
-
 spring:
+  config:
+    import: optional:configserver:http://localhost:8888
   application:
     name: discovery
 
-eureka:
-  instance:
-    hostname: localhost
-  client:
-    register-with-eureka: false
-    fetch-registry: false
-    service-url:
-      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
-
 logging:
   level:
-    com.netflix.discovery: INFO
-    org.springframework.cloud.netflix.eureka: INFO
+    com.netflix.discovery: DEBUG
+    org.springframework.cloud.netflix.eureka: DEBUG

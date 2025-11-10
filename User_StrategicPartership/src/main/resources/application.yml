@@ -1,0 +1,19 @@
+spring:
+  config:
+    import: optional:configserver:http://localhost:8888
+  application:
+    name: users  # Make sure the name is correct
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: DEBUG
+    com.yourpackage: DEBUG

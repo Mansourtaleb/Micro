@@ -1,0 +1,144 @@
+version: '3.8'
+
+services:
+  # MongoDB service
+  mongodb:
+    container_name: mongodb
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - timeforge-network
+
+  # Zipkin for distributed tracing
+  zipkin:
+    container_name: zipkin
+    image: openzipkin/zipkin:latest
+    ports:
+      - "9411:9411"
+    networks:
+      - timeforge-network
+
+  # Config Server
+  config-server:
+    build: ./config-server
+    ports:
+      - "8888:8888"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - timeforge-network
+
+  # Eureka Discovery Server
+  discovery:
+    build: ./discovery
+    ports:
+      - "8761:8761"
+    environment:
+      - EUREKA_SERVER=http://discovery:8761/eureka
+    networks:
+      - timeforge-network
+
+  # Gateway service
+  gateway:
+    build: ./gateway
+    ports:
+      - "8222:8222"
+    depends_on:
+      - config-server
+      - discovery
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-server:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery:8761/eureka
+    networks:
+      - timeforge-network
+
+  # Workspace_Workflow Service
+  workspace-workflow:
+    build: ./Workspace_Workflow
+    ports:
+      - "8500:8500" # Adjust port as needed
+    depends_on:
+      - config-server
+      - discovery
+    networks:
+      - timeforge-network
+
+  # Project_Task Service
+  project-task:
+    build: ./Project_Task
+    ports:
+      - "8400:8400" # Adjust port as needed
+    depends_on:
+      - config-server
+      - discovery
+    networks:
+      - timeforge-network
+
+  # Goal_Reward Service
+  goal-reward:
+    build: ./Goal_Reward
+    ports:
+      - "8200:8200" # Adjust port as needed
+    depends_on:
+      - config-server
+      - discovery
+    networks:
+      - timeforge-network
+
+  # User_StrategicPartership Service
+  user-strategicpartership:
+    build: ./User_StrategicPartership
+    ports:
+      - "8100:8100" # Adjust port as needed
+    depends_on:
+      - config-server
+      - discovery
+    networks:
+      - timeforge-network
+
+  # Notification_Message_Collaboration Service
+  notification-message-collaboration:
+    build: ./Notification_Message_Collaboration
+    ports:
+      - "8300:8300" # Adjust port as needed
+    depends_on:
+      - config-server
+      - discovery
+    networks:
+      - timeforge-network
+
+    # Workflow_ML Service
+  Workflow_ML:
+      build: ./Workflow_ML
+      ports:
+        - "8501:8501"  # Adjust port as needed
+      depends_on:
+        - config-server
+        - discovery
+      networks:
+        - timeforge-network
+
+    # TimeForge_ML Service
+  TimeForge_ML:
+      build: ./TimeForge_ML
+      ports:
+        - "8600:8600"  # Adjust port as needed
+      depends_on:
+        - config-server
+        - discovery
+      networks:
+        - timeforge-network
+networks:
+  timeforge-network:
+    driver: bridge
+
+volumes:
+  mongo_data:

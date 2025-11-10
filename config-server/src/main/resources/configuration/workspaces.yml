@@ -1,0 +1,25 @@
+application:
+  config:
+    users-url: http://localhost:8080/api/users  # Update this URL to match your user service URL
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+server:
+  port: 8301  # Make sure this port is available and matches your service configuration
+
+spring:
+  application:
+    name: workspaces
+  datasource:
+    url: jdbc:h2:mem:workspace;DB_CLOSE_DELAY=-1;MODE=MySQL;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.H2Dialect

@@ -1,28 +1,46 @@
-server:
-  port: 8100
-
-spring:
-  application:
-    name: users
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:8080/realms/timeforge
-
 eureka:
+  instance:
+    hostname: localhost
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
-    register-with-eureka: true
-    fetch-registry: true
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
+server:
+  port: 8100
+  servlet:
+    context-path: /timeforge
 
-logging:
-  level:
-    org.springframework.security: DEBUG
+
+  application:
+    name: users  # Correction du nom de l'application
+
+  # Configuration MongoDB
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/users
+      database: users
+
+  # Niveau de log pour MongoDB
+  logging:
+    level:
+      org.springframework.data.mongodb.core: DEBUG
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+    #  cloud:
+      #   compatibility-verifier:
+      #    enabled: false
+      #   zipkin:
+      #   base-url: http://localhost:9411
+      #   sleuth:
+        #        sampler:
+    #      probability: 1.0
+
+  # Configuration du serveur de l'application
+
+# Exclure l'autoconfiguration JDBC car on utilise MongoDB
+
+      # management:
+      #   tracing:
+      #      sampling:
+      #     probability: 0.0
+    #  enabled: false

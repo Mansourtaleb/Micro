@@ -1,42 +1,23 @@
-server:
-  port: 8222
-
 spring:
+  config:
+    import: optional:configserver:http://localhost:8888
   application:
-    name: gateway
-
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:8080/realms/timeforge
-
+    name: gateway # Correction du nom de l'application
   cloud:
     gateway:
-      discovery:
-        locator:
-          enabled: false   # ⬅️ désactive les routes auto
       routes:
         - id: users-service
-          uri: lb://users
+          uri: lb://USERS
           predicates:
-            - Path=/users/**
-          filters:
-            - RemoveRequestHeader=Cookie
-            # ❌ PAS de RewritePath ici
-      globalcors:
-        corsConfigurations:
-          "[/**]":
-            allowedOrigins: "*"
-            allowedMethods: "*"
-            allowedHeaders: "*"
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
+            - Path=/api/email/**
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:8761/eureka/
 
-logging:
-  level:
-    org.springframework.security: DEBUG
-    org.springframework.cloud.gateway: DEBUG
+server:
+  port: 8222

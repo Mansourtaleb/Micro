@@ -1,48 +1,59 @@
-server:
-  port: 8222
-
 spring:
   application:
     name: gateway
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:8080/realms/timeforge
   cloud:
     gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOrigins: "*"
-            allowedMethods: "*"
-            allowedHeaders: "*"
+      locator:
+        enabled: true
       routes:
-        - id: users-service
-          uri: lb://users
+        - id: users
+          uri: http://localhost:8100
           predicates:
             - Path=/users/**
-          filters:
-            - RemoveRequestHeader=Cookie
+
+        - id: goals
+          uri: http://localhost:8200
+          predicates:
+            - Path=/goals/**
+
+        - id: collaborations
+          uri: http://localhost:8300
+          predicates:
+            - Path=/collaborations/**
+
+        - id: projects
+          uri: http://localhost:8400
+          predicates:
+            - Path=/projects/**
+
+        - id: workspaces
+          uri: http://localhost:8500
+          predicates:
+            - Path=/workspaces/**
+
+        - id: keycloak
+          uri: http://localhost:8500
+          predicates:
+            - Path=/workspaces/**
+
+  config:
+    import: optional:configserver:http://localhost:8888
 
 eureka:
+  instance:
+    hostname: localhost
   client:
+    register-with-eureka: false
+    fetch-registry: false
     service-url:
-      defaultZone: http://localhost:8761/eureka
-    register-with-eureka: true
-    fetch-registry: true
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
+      defaultZone: http://${eureka.instance.hostname}:8761/eureka/
 
 logging:
   level:
-    org.springframework.cloud.gateway: DEBUG
-    org.springframework.security: DEBUG
+    com.netflix.discovery: DEBUG
+    org.springframework.cloud.netflix.eureka: DEBUG
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0

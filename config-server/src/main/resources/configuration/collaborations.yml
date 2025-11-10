@@ -1,0 +1,52 @@
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+server:
+
+  port: 8300
+  servlet:
+    context-path: /timeforge
+
+spring:
+  application:
+    name: collaborations  # Correction du nom de l'application
+
+  # Configuration MongoDB
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/timeforge
+      database: timeforge
+
+  # Niveau de log pour MongoDB
+  logging:
+    level:
+      org.springframework.data.mongodb.core: DEBUG
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  cloud:
+    compatibility-verifier:
+      enabled: false
+  zipkin:
+    base-url: http://localhost:9411
+  sleuth:
+    sampler:
+          probability: 1.0
+
+  # Configuration du serveur de l'application
+
+# Exclure l'autoconfiguration JDBC car on utilise MongoDB
+
+
+application:
+  config:
+    users-url: http://localhost:8222/users
+
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
