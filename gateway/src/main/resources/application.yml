@@ -1,0 +1,42 @@
+server:
+  port: 8222
+
+spring:
+  application:
+    name: gateway
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/timeforge
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false   # ⬅️ désactive les routes auto
+      routes:
+        - id: users-service
+          uri: lb://users
+          predicates:
+            - Path=/users/**
+          filters:
+            - RemoveRequestHeader=Cookie
+            # ❌ PAS de RewritePath ici
+      globalcors:
+        corsConfigurations:
+          "[/**]":
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.cloud.gateway: DEBUG
