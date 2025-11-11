@@ -5,10 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tn.esprit.workspace_workflow.FullWorkspaceResponse;
 import tn.esprit.workspace_workflow.entity.Workspace;
 import tn.esprit.workspace_workflow.service.WorkspaceService;
-import tn.esprit.workspace_workflow.service.TwilioSmsService;
 
 import java.util.List;
 
@@ -20,7 +18,6 @@ import java.util.List;
 public class WorkspaceController {
 
     private final WorkspaceService workspaceService;
-    private final TwilioSmsService twilioSmsService;
 
     @PostMapping("/create")
     public ResponseEntity<Workspace> createWorkspace(@RequestBody Workspace workspace) {
@@ -32,10 +29,6 @@ public class WorkspaceController {
         }
 
         Workspace savedWorkspace = workspaceService.createWorkspace(workspace);
-
-        // Envoi d'un SMS lors de la création d'un espace de travail
-        twilioSmsService.sendSms("+21694415244", "Un nouvel espace de travail a été créé : " + savedWorkspace.getWorkspaceName());
-
         return ResponseEntity.ok(savedWorkspace);
     }
 
@@ -56,10 +49,6 @@ public class WorkspaceController {
                                              @RequestBody Workspace workspace) {
         try {
             Workspace updatedWorkspace = workspaceService.updateWorkspace(workspaceId, workspace);
-
-            // Envoi d'un SMS lors de la mise à jour de l'espace de travail
-            twilioSmsService.sendSms("+21694415244", "L'espace de travail a été mis à jour : " + updatedWorkspace.getWorkspaceName());
-
             return ResponseEntity.ok(updatedWorkspace);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -71,22 +60,9 @@ public class WorkspaceController {
     public ResponseEntity<Void> deleteWorkspace(@PathVariable String workspaceId) {
         try {
             workspaceService.deleteWorkspace(workspaceId);
-
-            // Envoi d'un SMS lors de la suppression de l'espace de travail
-            //twilioSmsService.sendSms("+21694415244", "Un espace de travail a été supprimé avec l'ID : " + workspaceId);
-
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
-        }
-    }
-
-    @GetMapping("/withUsers/{workspaceId}")
-    public ResponseEntity<FullWorkspaceResponse> findWorkspaceWithUsers(@PathVariable String workspaceId) {
-        try {
-            return ResponseEntity.ok(workspaceService.findWorkspaceWithUsers(workspaceId));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 }

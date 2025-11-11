@@ -2,13 +2,9 @@ package tn.esprit.workspace_workflow.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import tn.esprit.workspace_workflow.client.User;
 import tn.esprit.workspace_workflow.entity.Workflow;
 import tn.esprit.workspace_workflow.repository.WorkflowRepository;
-
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -77,75 +73,6 @@ public class WorkflowService {
         } else {
             throw new RuntimeException("Workflow introuvable : " + workflowId);
         }
-    }
-
-    public Workflow assignCollaborators(String workflowId, List<User> collaborators) {
-        Workflow workflow = workflowRepository.findById(workflowId)
-                .orElseThrow(() -> new RuntimeException("Workflow not found"));
-
-        if (collaborators == null || collaborators.isEmpty()) {
-            throw new IllegalArgumentException("The list of collaborators cannot be empty.");
-        }
-
-        // Map collaborators to a stable identifier. Using email as identifier for now.
-        List<String> collaboratorIds = collaborators.stream()
-                .filter(Objects::nonNull)
-                .map(User::getEmail)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        workflow.setCollaboratorIds(collaboratorIds);
-        log.info("Collaborators assigned to workflow: {}", workflowId);
-        return workflowRepository.save(workflow);
-    }
-
-    public String trackWorkflow(String workflowId) {
-
-        boolean exists = workflowRepository.existsById(workflowId);
-        return exists ? "Valide" : "Non Valide";
-    }
-
-
-    public Map<String, Object> getDashboardStats() {
-
-        List<Workflow> workflows = workflowRepository.findAll();
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-
-        // Statistiques mensuelles : nombre de workflows par mois
-        Map<String, Long> workflowsPerMonth = workflows.stream()
-                .collect(Collectors.groupingBy(
-                        wf -> sdf.format(wf.getStartDate()),
-                        Collectors.counting()
-                ));
-
-        // Moyenne des étapes par mois
-        Map<String, Double> averageStepsPerMonth = workflows.stream()
-                .collect(Collectors.groupingBy(
-                        wf -> sdf.format(wf.getStartDate()),
-                        Collectors.averagingInt(wf -> wf.getSteps().size())
-                ));
-
-        // Répartition des workflows par taille (nombre d’étapes)
-        Map<String, Long> workflowsBySize = workflows.stream()
-                .collect(Collectors.groupingBy(
-                        wf -> {
-                            int size = wf.getSteps().size();
-                            if (size <= 3) return "Petit (<=3)";
-                            else if (size <= 6) return "Moyen (4-6)";
-                            else return "Grand (>6)";
-                        },
-                        Collectors.counting()
-                ));
-
-        // Compilation des stats
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("workflowsPerMonth", workflowsPerMonth);
-        stats.put("averageStepsPerMonth", averageStepsPerMonth);
-        stats.put("workflowsBySize", workflowsBySize);
-        stats.put("totalWorkflows", workflows.size());
-
-        return stats;
     }
 
 }
